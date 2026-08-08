@@ -53,7 +53,7 @@ flowchart LR
 | Unit tests | ✅ 42 tests, green |
 | Dataset builder (Spider + DDL schemas → ChatML, db-level train/val split) | ✅ Done, ~5.2k rows |
 | Local training script (QLoRA GPU / LoRA CPU, 1.5B default) | ✅ Done |
-| GGUF Q4_K_M conversion (llama.cpp + pip gguf, CPU) | ✅ Done |
+| GGUF conversion (q8_0 default, llama.cpp + pip gguf, CPU) | ✅ Done |
 | Unsloth QLoRA fine-tuning (notebook, Colab T4) | 🚧 Ready to run |
 | End-to-end benchmark on Spider dev | ⏳ Pending |
 
@@ -99,7 +99,7 @@ make prep-small          # ~1.8k balanced rows + repair pairs
 # 3) train a LoRA/QLoRA adapter and merge it (1.5B default, ~30-90 min on 1650 Ti)
 make train-local
 
-# 4) convert merged weights to GGUF Q4_K_M (CPU) and register with Ollama
+# 4) convert merged weights to GGUF (q8_0, pure Python/CPU) and register with Ollama
 make gguf
 make ollama-import
 

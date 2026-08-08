@@ -15,6 +15,7 @@ venv/
 /data/
 /checkpoints/
 /gguf/
+third_party/
 eval/results/*.csv
 eval/results/*.json
 

@@ -23,10 +23,10 @@ train-local:
 	python scripts/train_local.py --data data/chatml/train_local.jsonl --model 1.5b --out checkpoints/zeroerr-1.5b-merged
 
 gguf:
-	python scripts/convert_gguf.py --input checkpoints/zeroerr-1.5b-merged --output gguf/zeroerr-1.5b-q4_k_m.gguf
+	python scripts/convert_gguf.py --input checkpoints/zeroerr-1.5b-merged --output gguf/zeroerr-1.5b-q8_0.gguf --ftype q8_0
 
 ollama-import:
-	bash scripts/setup_ollama.sh gguf/zeroerr-1.5b-q4_k_m.gguf
+	bash scripts/setup_ollama.sh gguf/zeroerr-1.5b-q8_0.gguf
 
 fixtures:
 	python -m eval.fixtures.build
