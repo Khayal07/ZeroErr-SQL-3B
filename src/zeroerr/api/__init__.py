@@ -1,0 +1,1 @@
+"""FastAPI application: HTTP surface for text-to-SQL with the guardrail."""
