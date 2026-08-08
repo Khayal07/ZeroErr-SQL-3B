@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: zeroerr-api
+    ports:
+      - "8000:8000"
+    environment:
+      ZEROERR_ENGINE_BACKEND: ollama
+      ZEROERR_OLLAMA_BASE_URL: http://ollama:11434
+      ZEROERR_OLLAMA_MODEL: ${ZEROERR_OLLAMA_MODEL:-zeroerr:3b}
+      ZEROERR_SANDBOX_ENGINE: sqlite
+      ZEROERR_SANDBOX_DATA_DIR: /databases
+      ZEROERR_SANDBOX_TIMEOUT_SECONDS: "5"
+      ZEROERR_MAX_RETRY_ROUNDS: "3"
+    volumes:
+      - ./databases:/databases:ro
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: zeroerr-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    profiles: ["ollama"]
+    restart: unless-stopped
+
+volumes:
+  ollama:
