@@ -71,6 +71,16 @@ ZeroErr-SQL-3B/
 └── tests/                      # unit tests
 ```
 
+## 🖥️ Hardware Requirements
+
+| Stage | Recommended | Notes |
+|-------|-------------|-------|
+| **Fine-tuning** | **Google Colab T4** (free) or better | 3B QLoRA needs ≥ ~12 GB VRAM + native bf16. A local GTX 1050 Ti (4 GB, Pascal) is **not** enough for training. |
+| **Inference** | Any machine with Ollama (CPU is fine) | Q4_K_M GGUF runs comfortably on a 1050 Ti / CPU. |
+| **Guardrail + API + eval** | Any machine | CPU-only, 37 unit tests run without GPU/network. |
+
+On Windows, Colab is the smoothest path for training; inference and everything else run natively on Windows.
+
 ## 🧪 Quickstart
 
 ```bash
