@@ -12,9 +12,9 @@ venv/
 .env
 
 # Data & artifacts
-data/
-checkpoints/
-gguf/
+/data/
+/checkpoints/
+/gguf/
 eval/results/*.csv
 eval/results/*.json
 
