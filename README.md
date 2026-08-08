@@ -1,6 +1,6 @@
 # 🎯 ZeroErr-SQL-3B: Execution-Guided Text-to-SQL SLM
 
-> **Status: In Development** — core pipeline is scaffolded and unit-tested (37 tests, green). Fine-tuning and the end-to-end benchmark require a CUDA GPU and are the active next steps.
+> **Status: In Development** — core pipeline is scaffolded and unit-tested (37 tests, green). Local GPU QLoRA is verified working on GTX 1650 Ti (4-bit 1.5B, ~10 s/it); only the full training run remains (≈5 h, one command below) and then the end-to-end benchmark.
 
 **ZeroErr-SQL-3B** is an open-source project aimed at building a high-performance, execution-guided 3B Small Language Model (SLM) specialized in Text-to-SQL generation and error-free SQL debugging.
 
