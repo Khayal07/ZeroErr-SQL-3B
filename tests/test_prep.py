@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import json
 
-from zeroerr.data.prep import schema_text_for, to_chatml_row
+from zeroerr.data.prep import schema_text_for, split_by_db, to_chatml_row
+
+
+def test_split_by_db_is_leakage_free():
+    rows = [
+        {"db_id": f"d{i % 3}", "question": f"q{i}", "query": "SELECT 1", "text": f"t{i}"}
+        for i in range(30)
+    ]
+    train, val = split_by_db(rows, val_fraction=0.2, seed=0)
+    train_ids = {r["db_id"] for r in train}
+    val_ids = {r["db_id"] for r in val}
+    assert train_ids.isdisjoint(val_ids)
+    assert sum(1 for r in rows if r["db_id"] in val_ids) == len(val)
 
 
 def test_schema_injected_from_fixture(fixture_dbs):
