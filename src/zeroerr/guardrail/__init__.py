@@ -1,0 +1,1 @@
+"""Execution guardrail: sandboxed SQLite runner, error hints, self-correction loop."""
