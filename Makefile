@@ -8,7 +8,8 @@ install-dev:
 
 install-local:
 	pip install -e ".[local,dev]"
-	pip install torch --index-url https://download.pytorch.org/whl/cu124
+	pip install --force-reinstall --no-deps torch --index-url https://download.pytorch.org/whl/cu124
+	pip install --quiet bitsandbytes
 
 data:
 	python scripts/download_dataset.py

@@ -96,7 +96,7 @@ make install-local
 make data
 make prep-small          # ~1.8k balanced rows + repair pairs
 
-# 3) train a LoRA/QLoRA adapter and merge it (1.5B default, ~30-90 min on 1650 Ti)
+# 3) train a LoRA/QLoRA adapter and merge it (1.5B default, ~10 s/it on 1650 Ti)
 make train-local
 
 # 4) convert merged weights to GGUF (q8_0, pure Python/CPU) and register with Ollama
@@ -108,9 +108,11 @@ make ollama-import
 .\.venv\Scripts\python eval/run_benchmark.py --smoke
 ```
 
-Expected times (Ryzen 5 / 1650 Ti 4 GB): 1.5B QLoRA at `max_seq=512`,
-`batch 1 × grad-accum 8` — roughly 30–80 min for 1–2 epochs. CPU-only is
-several hours; keep `--per-bucket` small.
+Measured on Ryzen 5 / GTX 1650 Ti (4 GB): 1.5B QLoRA at `max_seq=384` runs
+**~10 s/it** — the full local set (`data/chatml/train_local.jsonl`, ~1.8k rows,
+1 epoch at effective batch 8) is roughly 1.5–2 h. CPU-only LoRA is much slower;
+keep `--per-bucket` small. Verify the CUDA path with
+`python scripts/train_local.py --data data/chatml/_smoke.jsonl --device cuda --steps 2`.
 
 ## 🧪 Quickstart
 
