@@ -35,3 +35,8 @@ def fixture_dbs(tmp_path_factory):
 @pytest.fixture()
 def dept_sandbox(fixture_dbs) -> SQLiteSandbox:
     return SQLiteSandbox(fixture_dbs["department_emp"])
+
+
+@pytest.fixture()
+def schema_dir_fixture(fixture_dbs) -> str:
+    return str(next(iter(fixture_dbs.values())).parent)
