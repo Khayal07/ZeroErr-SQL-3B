@@ -1,4 +1,4 @@
-.PHONY: install install-dev data prep fixtures test lint bench api serve-docs docker-up clean
+.PHONY: install install-dev data prep prep-small train-local gguf ollama-import fixtures test lint bench api serve-docs docker-up clean
 
 install:
 	pip install -e ".[train]"
@@ -6,11 +6,27 @@ install:
 install-dev:
 	pip install -e ".[dev]"
 
+install-local:
+	pip install -e ".[local,dev]"
+	pip install torch --index-url https://download.pytorch.org/whl/cu124
+
 data:
 	python scripts/download_dataset.py
 
 prep:
 	python -m zeroerr.data.prep -i data/raw/spider_train.jsonl -o data/chatml/train.jsonl --per-bucket 2000 --with-repairs --val-fraction 0.1
+
+prep-small:
+	python -m zeroerr.data.prep -i data/raw/spider_train.jsonl -o data/chatml/train_local.jsonl --per-bucket 600 --with-repairs
+
+train-local:
+	python scripts/train_local.py --data data/chatml/train_local.jsonl --model 1.5b --out checkpoints/zeroerr-1.5b-merged
+
+gguf:
+	python scripts/convert_gguf.py --input checkpoints/zeroerr-1.5b-merged --output gguf/zeroerr-1.5b-q4_k_m.gguf
+
+ollama-import:
+	bash scripts/setup_ollama.sh gguf/zeroerr-1.5b-q4_k_m.gguf
 
 fixtures:
 	python -m eval.fixtures.build

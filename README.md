@@ -50,16 +50,19 @@ flowchart LR
 | Inference engine (`LLMEngine` protocol + Ollama client) | ✅ Done |
 | HTTP API (`/v1/text2sql`, `/health`, `/dbs`) | ✅ Done |
 | Benchmark harness (`Execution Accuracy`, `VES`, base-vs-ft CLI, sqlite fixtures) | ✅ Done |
-| Unit tests | ✅ 37 tests, green |
-| Unsloth QLoRA fine-tuning (notebook) | 🚧 Requires GPU |
-| GGUF Q4_K_M export + Ollama import | 🚧 After training |
+| Unit tests | ✅ 42 tests, green |
+| Dataset builder (Spider + DDL schemas → ChatML, db-level train/val split) | ✅ Done, ~5.2k rows |
+| Local training script (QLoRA GPU / LoRA CPU, 1.5B default) | ✅ Done |
+| GGUF Q4_K_M conversion (llama.cpp + pip gguf, CPU) | ✅ Done |
+| Unsloth QLoRA fine-tuning (notebook, Colab T4) | 🚧 Ready to run |
 | End-to-end benchmark on Spider dev | ⏳ Pending |
 
 ## 📁 Project Structure
 
 ```
 ZeroErr-SQL-3B/
-├── notebooks/                  # 01 data prep · 02 Unsloth QLoRA · 03 GGUF export
+├── notebooks/                  # Colab: 01 data prep · 02 Unsloth QLoRA · 03 GGUF export
+├── scripts/                    # download_dataset · train_local · convert_gguf · setup_ollama
 ├── src/zeroerr/
 │   ├── data/                   # schema serialization, ChatML, filtering, prep CLI
 │   ├── guardrail/              # read-only sqlite sandbox + self-correction loop
@@ -67,7 +70,6 @@ ZeroErr-SQL-3B/
 │   └── api/                    # FastAPI service
 ├── eval/                       # execution accuracy (EX/VES), benchmark CLI, fixtures
 ├── docker/                     # API + Ollama compose, Modelfile
-├── scripts/                    # dataset download, ollama import
 └── tests/                      # unit tests
 ```
 
@@ -75,11 +77,40 @@ ZeroErr-SQL-3B/
 
 | Stage | Recommended | Notes |
 |-------|-------------|-------|
-| **Fine-tuning** | **Google Colab T4** (free) or better | 3B QLoRA needs ≥ ~12 GB VRAM + native bf16. A local GTX 1050 Ti (4 GB, Pascal) is **not** enough for training. |
-| **Inference** | Any machine with Ollama (CPU is fine) | Q4_K_M GGUF runs comfortably on a 1050 Ti / CPU. |
-| **Guardrail + API + eval** | Any machine | CPU-only, 37 unit tests run without GPU/network. |
+| **Fine-tuning (3B)** | **Google Colab T4** | 3B QLoRA needs ≥ ~12 GB VRAM + native bf16. Not feasible on a 4 GB gaming GPU. |
+| **Fine-tuning (1.5B, local)** | NVIDIA GPU ≥ 4 GB VRAM | QLoRA via `scripts/train_local.py` (~1 GB weights in 4-bit). Works on GTX 1650 Ti. |
+| **Fine-tuning (1.5B, CPU)** | Any CPU, ≥ 12 GB RAM | Much slower FP32 LoRA; only worth it for small datasets. |
+| **Inference** | Any machine with Ollama (CPU ok) | Q4_K_M GGUF runs comfortably on a 4 GB GPU / CPU. |
+| **Guardrail + API + eval** | Any machine | CPU-only, 42 unit tests run without GPU/network. |
 
-On Windows, Colab is the smoothest path for training; inference and everything else run natively on Windows.
+## 💻 Everything runs on your machine (no Colab)
+
+For a 4 GB NVIDIA GPU the trained model is the **1.5B** variant. Everything below is
+fully local and CPU-capable at every step.
+
+```bash
+# 1) one-time env setup (CUDA-enabled torch for your GPU)
+make install-local
+
+# 2) fetch Spider + DDL schemas, build a compact ChatML dataset
+make data
+make prep-small          # ~1.8k balanced rows + repair pairs
+
+# 3) train a LoRA/QLoRA adapter and merge it (1.5B default, ~30-90 min on 1650 Ti)
+make train-local
+
+# 4) convert merged weights to GGUF Q4_K_M (CPU) and register with Ollama
+make gguf
+make ollama-import
+
+# 5) verify with the guardrail + benchmark
+.\.venv\Scripts\python -m uvicorn zeroerr.api.main:app --port 8000
+.\.venv\Scripts\python eval/run_benchmark.py --smoke
+```
+
+Expected times (Ryzen 5 / 1650 Ti 4 GB): 1.5B QLoRA at `max_seq=512`,
+`batch 1 × grad-accum 8` — roughly 30–80 min for 1–2 epochs. CPU-only is
+several hours; keep `--per-bucket` small.
 
 ## 🧪 Quickstart
 
