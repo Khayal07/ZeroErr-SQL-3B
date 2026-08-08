@@ -1,4 +1,4 @@
-.PHONY: install install-dev prep fixtures test lint bench api serve-docs docker-up clean
+.PHONY: install install-dev data prep fixtures test lint bench api serve-docs docker-up clean
 
 install:
 	pip install -e ".[train]"
@@ -6,8 +6,11 @@ install:
 install-dev:
 	pip install -e ".[dev]"
 
+data:
+	python scripts/download_dataset.py
+
 prep:
-	python -m zeroerr.data.prep
+	python -m zeroerr.data.prep -i data/raw/spider_train.jsonl -o data/chatml/train.jsonl --per-bucket 2000 --with-repairs --val-fraction 0.1
 
 fixtures:
 	python -m eval.fixtures.build
