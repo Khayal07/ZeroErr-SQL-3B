@@ -1,0 +1,1 @@
+"""Benchmark tooling: execution accuracy, VES, CLI runner, and SQLite fixtures."""
